@@ -23,32 +23,32 @@ from drf_yasg.views import get_schema_view
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="API para telemetria de veiculos agricolas",
-        default_version="v1",
-        description="Sistema para cadastro e controle por telemetria de frota de veiculos agricolas",
-        terms_of_service="https://www.google.com/terms",
-        contact=openapi.Contact(email="eduardobonfim016@gmail.com"),
-        license=openapi.License(name="Free"),
+        title='API de Telemetria - Veículos Agrícolas',
+        default_version='v1',
+        description='Sistema para cadastro e controle por telemetria de frota de veículos agrícolas',
+        terms_of_service='https://www.google.com/policies/terms/',
+        contact=openapi.Contact(email='contato@telemetria.com.br'),
+        license=openapi.License(name='OpenSource'),
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
 )
 
-route = routers.DefaultRouter()
-route.register(r'Marca', viewsets.MarcaViewset, basename="Marca")
-route.register(r'Veiculo', viewsets.VeiculoViewset, basename="Veiculo")
-route.register(r'Modelo', viewsets.ModeloViewset, basename="Modelo")
-route.register(r'MedicaoVeiculo', viewsets.MedicaoVeiculoViewset, basename="MedicaoVeiculo")
-route.register(r'Medicao', viewsets.MedicaoViewset, basename="Medicao")
-route.register(r'UnidadeMedida', viewsets.UnidadeMedidaViewset, basename="UnidadeMedida")
+router = routers.DefaultRouter()
+router.register(r'Veiculos', viewsets.VeiculoViewSet, basename='veiculo')
+router.register(r'Marcas', viewsets.MarcaViewSet, basename='marca')
+router.register(r'Modelos', viewsets.ModeloViewSet, basename='modelo')
+router.register(r'MedicoesVeiculos', viewsets.MedicaoVeiculoViewSet, basename='medicao_veiculo')
+router.register(r'Medicoes', viewsets.MedicaoViewSet, basename='medicao')
+router.register(r'UnidadesMedida', viewsets.UnidadeMedidaViewSet, basename='unidade_medida')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(route.urls))
+    path('', include(router.urls)),
 ]
 
 urlpatterns += [
-    path('swaggersjson/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swaggrjson/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
