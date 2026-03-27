@@ -7,11 +7,11 @@ class VeiculoSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'id': {'help_text': 'Identificador do Veículo'},
-            'Descricao': {'help_text': 'Descrição do Veículo'},
-            'Marca': {'help_text': 'Marca do Veículo'},
-            'Modelo': {'help_text': 'Modelo do Veículo'},
-            'Ano': {'help_text': 'Ano do Veículo'},
-            'Horimetro': {'help_text': 'Horímetro do Veículo'},
+            'descricao': {'help_text': 'Descrição do Veículo'},
+            'marca': {'help_text': 'Marca do Veículo'},
+            'modelo': {'help_text': 'Modelo do Veículo'},
+            'ano': {'help_text': 'Ano do Veículo'},
+            'horimetro': {'help_text': 'Horímetro do Veículo'},
         }
 
 class MarcaSerializer(serializers.ModelSerializer):
@@ -20,7 +20,7 @@ class MarcaSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'id': {'help_text': 'Identificador da Marca'},
-            'Nome': {'help_text': 'Nome da Marca'},
+            'nome': {'help_text': 'Nome da Marca'},
         }
         
 class ModeloSerializer(serializers.ModelSerializer):
@@ -29,7 +29,7 @@ class ModeloSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'id': {'help_text': 'Identificador do Modelo'},
-            'Nome': {'help_text': 'Nome do Modelo'},
+            'nome': {'help_text': 'Nome do Modelo'},
         }
 
 class MedicaoVeiculoSerializer(serializers.ModelSerializer):
@@ -38,10 +38,10 @@ class MedicaoVeiculoSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'id': {'help_text': 'Identificador da Medição do Veículo'},
-            'Veiculo': {'help_text': 'Identificador do Veículo associado à medição. Buscar no GET da API veículo.'},
-            'Medicao': {'help_text': 'Identificador do Tipo de Medição associada à medição. Buscar no GET da API medição.'},
-            'Data': {'help_text': 'Data e hora da medição realizada. Esta informação deve vir da automação'},
-            'Valor': {'help_text': 'Valor da medição realizada.'},
+            'veiculo': {'help_text': 'Identificador do Veículo associado à medição. Buscar no GET da API veículo.'},
+            'medicao': {'help_text': 'Identificador do Tipo de Medição associada à medição. Buscar no GET da API medição.'},
+            'data': {'help_text': 'Data e hora da medição realizada. Esta informação deve vir da automação'},
+            'valor': {'help_text': 'Valor da medição realizada.'},
         }
         
 class MedicaoSerializer(serializers.ModelSerializer):
@@ -50,8 +50,8 @@ class MedicaoSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'id': {'help_text': 'Identificador do Tipo de Medição'},
-            'Tipo': {'help_text': 'Tipo da Medição (Ex: Temperatura, Pressão, etc)'},
-            'UnidadeMedida': {'help_text': 'Identificador da Unidade de Medida associada à medição. Buscar no GET da API unidade-medida.'},
+            'tipo': {'help_text': 'Tipo da Medição (Ex: Temperatura, Pressão, etc)'},
+            'unidade_medida': {'help_text': 'Identificador da Unidade de Medida associada à medição. Buscar no GET da API unidade-medida.'},
         }
 
 class UnidadeMedidaSerializer(serializers.ModelSerializer):
@@ -60,7 +60,7 @@ class UnidadeMedidaSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'id': {'help_text': 'Identificador da Unidade de Medida'},
-            'Nome': {'help_text': 'Nome da Unidade de Medida (Ex: °C, Bar, etc)'},
+            'nome': {'help_text': 'Nome da Unidade de Medida (Ex: °C, Bar, etc)'},
         }
 
 class UploadCSVSerializer(serializers.Serializer):
@@ -76,3 +76,11 @@ class MedicaoVeiculoTempSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.MedicaoVeiculoTemp
         fields = "__all__"
+        extra_kwargs = {
+            'id': {'help_text': 'Identificador temporário da medição'},
+            'veiculo_id': {'help_text': 'ID do veículo associado'},
+            'medicao_id': {'help_text': 'ID da medição associada'},
+            'data': {'help_text': 'Data e hora da medição'},
+            'valor': {'help_text': 'Valor da medição'},
+            'arquivo_id': {'help_text': 'Identificador do arquivo de origem'},
+        }
