@@ -48,8 +48,8 @@ class UnidadeMedida(models.Model):
         return self.Nome
 
 class MedicaoVeiculoTemp(models.Model):
-    Veiculo = models.ForeignKey('Veiculo', on_delete=models.DO_NOTHING)
-    Medicao = models.ForeignKey('Medicao', on_delete=models.DO_NOTHING)
-    Data = models.DateTimeField()
-    Valor = models.DecimalField(max_digits=10, decimal_places=2)
-    arquivo = models.CharField(max_length=256, db_index=True)
+    veiculoid = models.ForeignKey('Veiculo', on_delete=models.DO_NOTHING)
+    medicaoid = models.ForeignKey('Medicao', on_delete=models.DO_NOTHING)
+    data = models.DateTimeField()
+    valor = models.DecimalField(max_digits=10, decimal_places=2)
+    arquivoid = models.CharField(max_length=256, db_index=True)

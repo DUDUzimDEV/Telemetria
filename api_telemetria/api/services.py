@@ -6,9 +6,21 @@ from datetime import datetime
 
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from django.db import transaction
+from django.db import transaction, connection
 
 from api_telemetria.models import MedicaoVeiculoTemp, Veiculo, Medicao
+
+def executar_procedure_pos_importacao(arquivoid):
+    """
+    Executa a procedure no banco.
+    Ajuste o nome da procedure e os parâmetros conforme sua necessidade.
+    """
+    with connection.cursor() as cursor:
+        # Exemplo sem parâmetro:
+        # cursor.callproc("sua_procedure")
+
+        # Exemplo passando arquivoid:
+        cursor.callproc("processa_arquivo", [arquivoid])
 
 
 def processar_csv_medicoes(arquivo):
@@ -79,13 +91,23 @@ def processar_csv_medicoes(arquivo):
                     "linha": numero_linha,
                     "erro": str(e)
                 })
+    total_linhas_validas = len(linhas_para_inserir)
 
     with transaction.atomic():
-        MedicaoVeiculoTemp.objects.bulk_create(linhas_para_inserir, batch_size=1000)
+        if linhas_para_inserir:
+            MedicaoVeiculoTemp.objects.bulk_create(linhas_para_inserir, batch_size=1000)
 
-    total_linhas_importadas = MedicaoVeiculoTemp.objects.filter(
-        arquivoid=arquivoid
-    ).count()
+        total_linhas_importadas = MedicaoVeiculoTemp.objects.filter(
+            arquivoid=arquivoid
+        ).count()
+
+        quantidades_conferem = total_linhas_validas == total_linhas_importadas
+
+        if quantidades_conferem:
+           executar_procedure_pos_importacao(arquivoid)
+        else:
+            MedicaoVeiculoTemp.objects.filter(arquivoid=arquivoid).delete()
+
 
     return {
         "arquivoid": arquivoid,
@@ -93,6 +115,6 @@ def processar_csv_medicoes(arquivo):
         "caminho": caminho_completo,
         "total_linhas_arquivo": total_linhas_arquivo,
         "total_linhas_importadas": total_linhas_importadas,
-        "quantidades_conferem": total_linhas_arquivo == total_linhas_importadas,
+        "quantidades_conferem": total_linhas_validas == total_linhas_importadas,
         "erros": erros
     }

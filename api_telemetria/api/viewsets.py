@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
-from api_telemetria.services import processar_csv_medicoes
+from api_telemetria.api.services import processar_csv_medicoes
 
 class VeiculoViewSet(viewsets.ModelViewSet):
     queryset = models.Veiculo.objects.all()
@@ -263,18 +263,6 @@ class UnidadeMedidaViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
     
-class MedicaoVeiculoTempViewset(viewsets.ModelViewSet):
-    serializer_class = serializers.MedicaoVeiculoTempSerializer
-    queryset = models.MedicaoVeiculoTemp.objects.all()
-
-    @swagger_auto_schema(
-        operation_description="Retorna todas as informações de medições dos arquivos",
-        responses={200: serializers.MedicaoVeiculoTempSerializer(many=True)}
-    )
-
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-    
 class ImportarMedicaoCSVViewSet(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
@@ -303,3 +291,16 @@ class ImportarMedicaoCSVViewSet(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+class MedicaoVeiculoTempViewset(viewsets.ModelViewSet):
+    serializer_class = serializers.MedicaoVeiculoTempSerializer
+    queryset = models.MedicaoVeiculoTemp.objects.all()
+
+    @swagger_auto_schema(
+        operation_description="Retorna todas as informações de medições dos arquivos",
+        responses={200: serializers.MedicaoVeiculoTempSerializer(many=True)}
+    )
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    

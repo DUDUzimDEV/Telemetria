@@ -20,8 +20,9 @@ from rest_framework import routers, permissions
 from api_telemetria.api import viewsets
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
-from django.conf import settings
 from django.conf.urls.static import static
+from django.conf import settings
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -47,6 +48,7 @@ router.register(r'UnidadesMedida', viewsets.UnidadeMedidaViewSet, basename='unid
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include(router.urls)),
+    path("medicoes/importar-csv/", viewsets.ImportarMedicaoCSVViewSet.as_view(), name='importar-medicao-csv'),
 ]
 
 urlpatterns += [
