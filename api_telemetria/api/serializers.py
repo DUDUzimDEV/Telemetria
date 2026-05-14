@@ -84,3 +84,12 @@ class MedicaoVeiculoTempSerializer(serializers.ModelSerializer):
             'valor': {'help_text': 'Valor da medição'},
             'arquivo_id': {'help_text': 'Identificador do arquivo de origem'},
         }
+
+class DadosRelatorioSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    data = serializers.DateTimeField()
+    descricao = serializers.CharField()
+    modelo = serializers.CharField()
+    marca = serializers.CharField()
+    tipo = serializers.CharField()
+    valor = serializers.DecimalField(max_digits=10, decimal_places=2)

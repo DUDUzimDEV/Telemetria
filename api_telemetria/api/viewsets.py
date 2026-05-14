@@ -1,13 +1,20 @@
 from rest_framework import viewsets
+from rest_framework.filters import OrderingFilter, SearchFilter
 from api_telemetria import models
 from api_telemetria.api import serializers
 from drf_yasg.utils import swagger_auto_schema
 
 from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from api_telemetria.api.services import processar_csv_medicoes
+from rest_framework.decorators import action
+from rest_framework.response import Response        
+from django.shortcuts import get_object_or_404   
+from django.db.models import F
+from drf_yasg import openapi
+
+
 
 class VeiculoViewSet(viewsets.ModelViewSet):
     queryset = models.Veiculo.objects.all()
@@ -146,6 +153,19 @@ class ModeloViewSet(viewsets.ModelViewSet):
 class MedicaoVeiculoViewSet(viewsets.ModelViewSet):
     queryset = models.MedicaoVeiculo.objects.all()
     serializer_class = serializers.MedicaoVeiculoSerializer
+    filter_backends = [OrderingFilter, SearchFilter]
+    ordering_fields = ['data', 'valor']
+    search_fields = ['veiculo__descricao', 'medicao__tipo']
+
+    def get_queryset(self):
+        return models.MedicaoVeiculo.objects.select_related(
+            'medicao',
+            'medicao__unidademedida',
+            'veiculo',
+            'veiculo__modelo',
+            'veiculo__modelo__marca',
+        ).all()
+
     
     @swagger_auto_schema(
         operation_description="Retorna todas os tipos de medição de veículos específicos",
@@ -183,6 +203,15 @@ class MedicaoVeiculoViewSet(viewsets.ModelViewSet):
     )
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
+    
+    @action(detail=True, methods=['get'], url_path='tituloscategoria')
+    def list_medicao_veiculo(self, request, pk=None):
+        # Verifica se o veículo existe
+        veiculo = get_object_or_404(models.Veiculo, id=pk)
+        # Retorna todas as medições do veículo informado
+        medicoes = models.MedicaoVeiculo.objects.filter(veiculo_id=pk)
+        serializer = serializers.MedicaoVeiculoSerializer(medicoes, many=True)
+        return Response(serializer.data)
 
 class MedicaoViewSet(viewsets.ModelViewSet):
     queryset = models.Medicao.objects.all()
@@ -303,4 +332,65 @@ class MedicaoVeiculoTempViewset(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+class DadosRelatorioViewSet(viewsets.ViewSet):
+   
+    @swagger_auto_schema(
+        operation_description="Retorna dados para relatório"  ,
+        manual_parameters=[
+
+           
+                openapi.Parameter(
+                'data_inicio',
+                openapi.IN_QUERY,
+                description="Data inicial",
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATE
+            ),
+
+                openapi.Parameter(
+                'data_fim',
+                openapi.IN_QUERY,
+                description="Data final",
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATE
+            ),
+
+        ]
+   
+    )
+    @action(detail=False, methods=['get'])
+
+    def DadosRelatorio(self, request):
+        data_inicio = self.request.query_params.get("data_inicio")
+        data_fim = self.request.query_params.get("data_fim")
+
+        queryset = models.MedicaoVeiculo.objects.select_related(
+            'medicao__unidade_medida',
+            'veiculo__modelo',
+            'veiculo__marca'
+        )
+
+        if data_inicio:
+            queryset = queryset.filter(data__gte=data_inicio)
+        if data_fim:
+            queryset = queryset.filter(data__lte=data_fim)
+
+        dados = queryset.annotate(
+            descricao=F('veiculo__descricao'),
+            modelo=F('veiculo__modelo__nome'),
+            marca=F('veiculo__marca__nome'),
+            tipo=F('medicao__tipo'),
+        ).values(
+            'id',
+            'data',
+            'descricao',
+            'modelo',
+            'marca',
+            'tipo',
+            'valor'
+        )
+
+        dadosSerializer = serializers.DadosRelatorioSerializer(dados, many=True)
+        return Response(dadosSerializer.data)
     
